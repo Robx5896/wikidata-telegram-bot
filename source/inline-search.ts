@@ -3,7 +3,7 @@ import {Composer} from 'grammy';
 import type {InlineKeyboardMarkup, InlineQueryResultArticle, InlineQueryResultPhoto} from 'grammy/types';
 import type {MiddlewareProperty as WikibaseMiddlewareProperty} from 'telegraf-wikibase';
 import type {SearchResult} from 'wikibase-sdk';
-import {entitiesInClaimValues, getPopularEntities, searchEntities} from './wd-helper.js';
+import {addHistoryEntity, entitiesInClaimValues, getPopularEntities, searchEntities} from './wd-helper.js';
 import {entityButtons, entityWithClaimText, image} from './format-wd-entity.js';
 import {format} from './format/index.js';
 import * as CLAIMS from './claim-ids.js';
@@ -13,7 +13,7 @@ export const bot = new Composer<Context>();
 
 async function getSearchResults(
 	language: string,
-	query: string,
+	query: string
 ): Promise<readonly string[]> {
 	if (query) {
 		const results = await search(language, query);
@@ -45,7 +45,7 @@ bot.on('inline_query', async ctx => {
 		switch_pm_text: '🏳️‍🌈 ' + (await ctx.wd.reader('menu.language')).label(),
 		switch_pm_parameter: 'language',
 		is_personal: true,
-		cache_time: 20,
+		cache_time: 5,
 	};
 
 	if (process.env['NODE_ENV'] !== 'production') {
@@ -54,9 +54,16 @@ bot.on('inline_query', async ctx => {
 
 	console.timeEnd(identifier);
 
+	//await addHistoryEntity(ctx.from.id, query, "query");
+
 	return ctx.answerInlineQuery([
 		...inlineResults,
 	], options);
+});
+
+// handler to take the entityId of the wikidata resource and save it to the history table in the sqlite database
+bot.on("chosen_inline_result", async (ctx) => {
+	await addHistoryEntity(ctx.from.id, ctx.chosenInlineResult.result_id, "entity");
 });
 
 async function search(

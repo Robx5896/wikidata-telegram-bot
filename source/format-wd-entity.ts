@@ -4,6 +4,7 @@ import type {MiddlewareProperty as WikibaseMiddlewareProperty, WikibaseEntityRea
 import {array, format} from './format/index.js';
 import {typedEntries, unreachable} from './javascript-helper.js';
 import * as CLAIMS from './claim-ids.js';
+import {baseBot} from './index.js';
 
 export async function entityWithClaimText(
 	wb: WikibaseMiddlewareProperty,
@@ -17,7 +18,7 @@ export async function entityWithClaimText(
 	text += '\n\n';
 
 	const claimTextEntries = await Promise.all(claimIds
-		.map(async o => claimText(wb, entity, o)));
+		.map(async o => claimText(wb, entity, o, entityId)));
 
 	text += claimTextEntries
 		.filter(Boolean)
@@ -101,13 +102,14 @@ async function claimText(
 	wb: WikibaseMiddlewareProperty,
 	entity: WikibaseEntityReader,
 	claim: PropertyId,
+	entityId: string,
 ): Promise<string> {
 	const claimReader = await wb.reader(claim);
 	const claimLabel = claimReader.label();
 	const claimValues = entity.claimValues(claim);
 
 	const claimValueTexts = await Promise.all(claimValues
-		.map(async o => claimValueText(wb, o)));
+		.map(async o => claimValueText(wb, o, entityId)));
 
 	return array(claimLabel, claimValueTexts);
 }
@@ -115,10 +117,11 @@ async function claimText(
 async function claimValueText(
 	wb: WikibaseMiddlewareProperty,
 	s: SnakValue,
+	entityId: string
 ): Promise<string> {
 	if (s.type === 'wikibase-entityid') {
 		const reader = await wb.reader(s.value.id);
-		return format.url(format.escape(reader.label()), reader.url());
+		return format.url(format.escape(reader.label()), `https://t.me/${(await baseBot.api.getMe()).username}?start=` + `${s.value.id}_${entityId}`);
 	}
 
 	if (s.type === 'string') {
@@ -132,7 +135,7 @@ async function claimValueText(
 
 	if (s.type === 'quantity') {
 		const amount = format.escape(s.value.amount);
-		const unit = await formatUnit(wb, s.value.unit);
+		const unit = await formatUnit(wb, s.value.unit, entityId);
 		return unit ? `${amount} ${unit}` : amount;
 	}
 
@@ -147,7 +150,7 @@ async function claimValueText(
 	unreachable(s);
 }
 
-async function formatUnit(wb: WikibaseMiddlewareProperty, unit: string) {
+async function formatUnit(wb: WikibaseMiddlewareProperty, unit: string, entityId: string) {
 	// Special case: This is like factor 1, it does nothing.
 	if (unit === '1') {
 		return false;
@@ -159,7 +162,7 @@ async function formatUnit(wb: WikibaseMiddlewareProperty, unit: string) {
 	}
 
 	const reader = await wb.reader(entity[0]);
-	return format.url(format.escape(reader.label()), reader.url());
+	return format.url(format.escape(reader.label()), `https://t.me/${(await baseBot.api.getMe()).username}?start=` + `${entity[0]}_${entityId}`);
 }
 
 export function image(

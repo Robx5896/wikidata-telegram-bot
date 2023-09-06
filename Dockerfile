@@ -28,4 +28,4 @@ COPY wikidata-items.yaml ./
 COPY --from=builder /build/dist ./
 
 ENTRYPOINT ["node", "--enable-source-maps"]
-CMD ["wikidata-telegram-bot.js"]
+CMD ["index.js"]

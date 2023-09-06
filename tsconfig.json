@@ -7,6 +7,8 @@
 		"declaration": false,
 		"esModuleInterop": true,
 		"sourceMap": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
 		"target": "ES2022", // Node.js 18
 		"outDir": "dist"
 	}

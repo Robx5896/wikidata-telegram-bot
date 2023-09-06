@@ -2,7 +2,7 @@ import {Composer} from 'grammy';
 import {html as format} from 'telegram-format';
 import {type Body, MenuMiddleware, MenuTemplate} from 'grammy-inline-menu';
 import type {Location} from 'grammy/types';
-import {sparqlQuerySimplified} from './wd-helper.js';
+import {addHistoryEntity, sparqlQuerySimplified} from './wd-helper.js';
 import type {Context} from './bot-generics.js';
 
 type EntityId = string;
@@ -146,5 +146,14 @@ bot.on('message:location', async ctx => {
 	ctx.session.locationPage = 0;
 	const {location} = ctx.message;
 	const path = `location:${location.longitude}:${location.latitude}/`;
+	await addHistoryEntity(ctx.from.id, `${location.longitude}:${location.latitude}`, "location");
 	return menuMiddleware.replyToContext(ctx, path);
+});
+
+bot.callbackQuery(/^location:/, async ctx => {
+	const {data} = ctx.callbackQuery;
+		const path = data;
+		await addHistoryEntity(ctx.from.id, path.slice(9), "location");
+		await ctx.deleteMessage();
+		return menuMiddleware.replyToContext(ctx, path + '/');
 });
