@@ -33,4 +33,4 @@ sparql-send-object =
   Send me the object of the query:
 
 sparql-no-results =
-  The query provided no results.
+  Invalid sparql query.
