@@ -3,7 +3,7 @@ import {Composer} from 'grammy';
 import type {InlineKeyboardMarkup, InlineQueryResultArticle, InlineQueryResultPhoto} from 'grammy/types';
 import type {MiddlewareProperty as WikibaseMiddlewareProperty} from 'telegraf-wikibase';
 import type {SearchResult} from 'wikibase-sdk';
-import {addHistoryEntity, entitiesInClaimValues, getPopularEntities, searchEntities} from './wd-helper.js';
+import {addHistoryEntity, clearHistoryPaths, entitiesInClaimValues, getPopularEntities, searchEntities} from './wd-helper.js';
 import {entityButtons, entityWithClaimText, image} from './format-wd-entity.js';
 import {format} from './format/index.js';
 import * as CLAIMS from './claim-ids.js';
@@ -64,6 +64,7 @@ bot.on('inline_query', async ctx => {
 // handler to take the entityId of the wikidata resource and save it to the history table in the sqlite database
 bot.on("chosen_inline_result", async (ctx) => {
 	await addHistoryEntity(ctx.from.id, ctx.chosenInlineResult.result_id, "entity");
+	await clearHistoryPaths(ctx.from.id);
 });
 
 async function search(

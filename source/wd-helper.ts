@@ -171,6 +171,17 @@ export async function addHistoryEntityPath(
 	await historyRepository.insert(newEntity);
   }
   
+export async function clearHistoryPaths(
+	user_id: number
+  ): Promise<void> {
+	const historyRepository = historyDB.getRepository(HistoryPaths);
+	await historyRepository
+		.createQueryBuilder()
+		.delete()
+		.from(HistoryPaths)
+		.where("user_id = :user_id", { user_id: user_id })
+		.execute();
+}
 
 export async function initializeSparQLQuery(
 	user_id: number

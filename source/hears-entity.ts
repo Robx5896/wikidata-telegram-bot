@@ -1,5 +1,5 @@
 import {Composer} from 'grammy';
-import {addHistoryEntity, addHistoryEntityPath, entitiesInClaimValues} from './wd-helper.js';
+import {addHistoryEntity, addHistoryEntityPath, clearHistoryPaths, entitiesInClaimValues} from './wd-helper.js';
 import {entityButtons, entityWithClaimText, image} from './format-wd-entity.js';
 import {format} from './format/index.js';
 import * as CLAIMS from './claim-ids.js';
@@ -11,6 +11,8 @@ bot.hears([/^\/?([qpl][1-9]\d*)$/i, /^\/start ([qpl][1-9]\d*)(?:_([qpl][1-9]\d*)
 	const entityId = ctx.match[1]!.toUpperCase();
 	if (ctx.match[2]) {
 		await addHistoryEntityPath(ctx.from?.id as number, `${ctx.match[1]!.toUpperCase()} ${ctx.match[2]!.toUpperCase()}`);
+	} else {
+		await clearHistoryPaths(ctx.from?.id as number)
 	}
 	const entity = await ctx.wd.reader(entityId);
 	const claimEntityIds = entitiesInClaimValues([entity], CLAIMS.TEXT_INTEREST);
