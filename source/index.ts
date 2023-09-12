@@ -108,7 +108,7 @@ bot.hears(
 						callback_data: 'locations-history'
 					}],
 					[{
-						text: 'Last 5 paths',
+						text: 'Last path',
 						callback_data: 'paths-history'
 					}]
 				]
